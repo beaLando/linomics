@@ -1,0 +1,57 @@
+# MAFFT alignment + trimAL
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/
+
+
+## Put all consensi together and linearise fasta
+### From the concatenated file resulting from following script I then manually removed the string ".consensus.filtered" and cleaned the names of the added sequences L. usitatissimum and Phyllanthus as this was easily done with text editor
+
+for f in `ls ./data/Lb_plastomes_raw/Consensus/consensus_named/*.fa`
+
+do
+
+seq_name=$(basename -s .fa $f)
+echo ${seq_name}
+
+sed -e 's/\(^>.*$\)/#\1#/' $f | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | cat >> ./data/Lb_plastomes_raw/Consensus/all_plastomes.fa
+
+done
+
+
+
+## Run MAFFT and trimAL
+
+mafft --thread 6 --nuc ./data/Lb_plastomes_raw/Consensus/all_plastomes.fa > ./data/Lb_plastomes_raw/Consensus/all_plastomes_aligned.fa ##because sequences are long, I cannot do local alignment as for Angiosperm353
+
+/home/bland/Programs/trimAl/source/trimal -in ./data/Lb_plastomes_raw/Consensus/all_plastomes_aligned.fa -out ./data/Lb_plastomes_raw/Consensus/all_plastomes_aligned_trimmed.fa -automated1 -fasta 
+
+
+
+# IQtree
+
+#mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/plastome
+#mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/plastome/iqtree
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/data/Lb_plastomes_raw/Consensus/
+
+iqtree -nt 6 -s all_plastomes_aligned_trimmed.fa -m GTR+I+G -bb 1000 -wbtl -o "L88"
+
+
+
+# BEAUTI & BEAST
+
+export DISPLAY=$(route.exe print | grep 0.0.0.0 | head -1 | awk '{print $4}'):0.0 ##to enable GUI
+
+mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/plastome/beast
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/output/plastome/beast
+
+beauti #set normally distributed priors based on astral353_gtri for LbLus node (mean = 0.25, sd = 1) and crown node (mean = 17.5, sd = 1)
+
+beast -threads 6 #around 2 hrs for empty run + 7 hrs for run on dataset 
+
+# then check output in tracer
+
+treAnnotator
+
+# then plot in R

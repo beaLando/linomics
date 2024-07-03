@@ -1,0 +1,43 @@
+## GUTAKER + PORTSMOUTH
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/data/Lb_TFL1
+
+sed -e 's/\(^>.*$\)/#\1#/' ./lowdepth_gutaker_lb.fas | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | cat >> ./lb_all.fasta
+
+mafft --thread 5 --nuc --localpair --maxiterate 1000 ./lb_all.fasta > ./lb_all.mft
+
+/home/bland/Programs/trimAl/source/trimal -in ./lb_all.mft -out ./lb_all.mft.tal -automated1 -fasta 
+
+mkdir ./tfl1_all_tree/
+
+iqtree -nt 5 -s ./lb_all.mft.tal -m GTR+I+G -bb 1000 -pre ./tfl1_all_tree/
+
+
+## PORTSMOUTH ONLY
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/data/Lb_TFL1
+
+sed -e 's/\(^>.*$\)/#\1#/' ./candidateTFL1_genotypes_lowdepth.fas | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | cat >> ./lb_port.fasta
+
+mafft --thread 5 --nuc --localpair --maxiterate 1000 ./lb_port.fasta > ./lb_port.mft
+
+/home/bland/Programs/trimAl/source/trimal -in ./lb_port.mft -out ./lb_port.mft.tal -automated1 -fasta 
+
+mkdir ./tfl1_port_tree/
+
+iqtree -nt 5 -s ./lb_port.mft.tal -m GTR+I+G -bb 1000 -pre ./tfl1_port_tree/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+data/
+paper/
+output/
+scripts/config_files
+scripts/config_files/
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.tab
+analysis.Rproj
+.Rproj.user/
+*.Rhistory
+*.png
+*.jpeg
+*.pptx
+*.log

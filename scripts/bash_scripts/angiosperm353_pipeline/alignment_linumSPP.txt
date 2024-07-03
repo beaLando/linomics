@@ -1,0 +1,111 @@
+# If GDrive does not appear under /mnt/g, you need to mount it with:
+# sudo mount -t drvfs G: /mnt/g
+
+
+
+# Go to A353 data directory and create alignment subfolder
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/data/Angiosperm353
+
+mkdir ./aln
+
+
+# Write files for each gene and species: 
+
+##1. linearise fasta files for new species (remove enters)
+##2. cleanse fasta headers from repository and project name (leaves gene number, gene name, and spp) for new species
+##3. linearise linum seqs provided by Juan and append them to new species fasta files
+
+for f in `ls ./seqLinum_raw/*.FNA`
+
+do
+
+gene_name=$(basename -s .FNA $f)
+echo ${gene_name}
+
+output_name=${gene_name}.fasta
+echo ${output_name}
+
+sed -e 's/\(^>.*$\)/#\1#/' ./PAFTOL_raw/*.fasta | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | grep -w -A 1 -e ${gene_name} --no-group-separator --no-filename | cat | sed '/^>/ s/Repository.*//' | cat | sed '/^>/ s/[0-9]*//g' | cat | cut -d ' ' -f 1,3 | cat | cut -c 1,11- > ./aln/${output_name}
+
+sed -e 's/\(^>.*$\)/#\1#/' $f | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | cat | grep -Ff IDs_2remove.txt -v | cat >> ./aln/${output_name}
+
+done
+
+
+# Run mafft alignment for each gene
+
+mkdir ./aln/aligned/
+
+
+for raw in `ls ./aln/*.fasta`
+
+do
+
+gene_name=$(basename -s .fasta $raw)
+echo ${gene_name}
+
+mafft --thread 3 --nuc --localpair --maxiterate 1000 $raw > ./aln/aligned/${gene_name}.mft
+
+done
+
+
+
+# Trim alignments for each gene
+
+mkdir ./aln/aligned_trimmed/
+
+
+for mft in `ls ./aln/aligned/*.mft`
+
+do
+
+gene_name=$(basename -s .mft $mft)
+echo ${gene_name}
+
+/home/bland/Programs/trimAl/source/trimal -in $mft -out ./aln/aligned_trimmed/${gene_name}.mft.tal -automated1 -fasta 
+
+done
+
+
+
+# Clean fasta headers and rm aligned_trimmed directory
+
+mkdir ./aln/aligned_trimmed_clean/
+
+for mft in `ls ./aln/aligned/*.mft`
+
+do
+
+gene_name=$(basename -s .mft $mft)
+echo ${gene_name}
+
+sed -e '/^>/s/ .*//' ./aln/aligned_trimmed/${gene_name}.mft.tal | cat > ./aln/aligned_trimmed_clean/${gene_name}.mft.tal
+done
+
+rm -r ./aln/aligned_trimmed/
+
+
+
+# Create concatenated supermatrix for all genes with phyutility & partition with code retrieved at https://evomics.org/wp-content/uploads/2019/01/Workshop_practical_concatenation_model_testing.pdf (then refine partition file in r)
+
+mkdir ./aln/aligned_trimmed_clean_supermatrix/
+
+java -jar /home/bland/Programs/phyutility/phyutility.jar -concat -in ./aln/aligned_trimmed_clean/*.mft.tal -out ./aln/aligned_trimmed_clean_supermatrix/supermx353.mft.tal.nexus
+
+head -n 3 ./aln/aligned_trimmed_clean_supermatrix/supermx353.mft.tal.nexus | tail -n 1 | sed 's/^.*\[//g' | sed 's/\s\].*$//g' | sed 's/.fa.mafft.trimal_gene.\s/=/g' | tr " " "\n" | sed 's/^/AUTO,\s/g' > ./aln/aligned_trimmed_clean_supermatrix/supermx353_partitions.txt
+
+
+## Make ambiguity codes explicit in nexus1 (n = [acgt]) ...this does not work, although it should (see here https://groups.google.com/g/iqtree/c/uhTPCysfCVE). I think it is because partitions should have number of character obtained after turning n into [acgt] (+4 characters for each n substituted)
+sed -e 's/Linum/Lixum/g;s/bienne/biexxe/g;s/leonii/leoxii/g;s/perenne/perexxe/g;s/grandiflorum/graxdiflorum/g;s/tenuifolium/texuifolium/g;' ./aln/aligned_trimmed_clean_supermatrix/supermx353.mft.tal.nexus | sed -e '7,${s/n/[acgt]/g}' | sed -e '7,${s/x/n/g}' | cat > ./aln/aligned_trimmed_clean_supermatrix/supermx353_final.mft.tal.nexus
+
+## Turn ambiguity codes into missing in nexus2 (n = ?) ...this works, but I am not sure what is the impact of coding ambiguous site as missing
+sed -e 's/Linum/Lixum/g;s/bienne/biexxe/g;s/leonii/leoxii/g;s/perenne/perexxe/g;s/grandiflorum/graxdiflorum/g;s/tenuifolium/texuifolium/g;s/mesembryanthemifolia/mesembryaxthemifolia/g;s/Phyllanthus/Phyllaxthus/g' ./aln/aligned_trimmed_clean_supermatrix/supermx353.mft.tal.nexus | sed -e '7,${s/n/?/g}' | sed -e '7,${s/x/n/g}' | cat > ./aln/aligned_trimmed_clean_supermatrix/supermx353_final.mft.tal.nexus
+
+
+
+
+
+
+
+

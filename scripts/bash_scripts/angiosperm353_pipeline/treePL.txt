@@ -1,0 +1,80 @@
+# treePL
+
+## convergence is not reached when calibrating tree with linum fossil + either (or both) of the older calibration points (linoids + phyllantoids and crown node - euphorbioids)
+## convergence is reached with linum calibration alone or the other two calibration points together
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/
+
+#mkdir ./output/Angiosperm353/treePL/
+
+
+#PRIMING
+
+##ASTRAL UNROOTED
+treePL ./scripts/config_files/astral_euphorbs_gtrg_unrooted_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_unrooted_2prime_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrg_unrooted_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_unrooted_2prime_smooth100.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_unrooted_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_unrooted_2prime_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_unrooted_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_unrooted_2prime_smooth100.log
+
+##ASTRAL ROOTED
+treePL ./scripts/config_files/astral_euphorbs_gtrg_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_2prime_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrg_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_2prime_smooth100.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_2prime_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_2prime_smooth100.log
+
+##ASTRAL ROOTED 2CALS
+treePL ./scripts/config_files/astral_euphorbs_gtrig_2prime_2cals_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_2prime_2cals_smooth100.log
+
+##SUPERMX ROOTED
+treePL ./scripts/config_files/supermx_euphorbs_gtrg_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/supermx_euphorbs_gtrg_2prime_smooth0.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrg_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/supermx_euphorbs_gtrg_2prime_smooth100.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrig_2prime_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/supermx_euphorbs_gtrig_2prime_smooth0.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrig_2prime_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/supermx_euphorbs_gtrig_2prime_smooth100.log
+
+
+
+#DATING
+
+##ASTRAL UNROOTED
+treePL ./scripts/config_files/astral_euphorbs_gtrg_unrooted_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_unrooted_primed_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrg_unrooted_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_unrooted_primed_smooth100.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_unrooted_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_unrooted_primed_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_unrooted_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_unrooted_primed_smooth100.log
+
+##ASTRAL ROOTED
+treePL ./scripts/config_files/astral_euphorbs_gtrg_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_primed_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrg_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/astral_euphorbs_gtrg_primed_smooth100.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_primed_smooth0.log
+
+treePL ./scripts/config_files/astral_euphorbs_gtrig_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_primed_smooth100.log
+
+##ASTRAL ROOTED 2 CALS
+treePL ./scripts/config_files/astral_euphorbs_gtrig_primed_2cals_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/astral_euphorbs_gtrig_primed_2cals_smooth100.log
+
+##SUPERMX ROOTED
+treePL ./scripts/config_files/supermx_euphorbs_gtrg_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_g/supermx_euphorbs_gtrg_primed_smooth0.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrg_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_g/supermx_euphorbs_gtrg_primed_smooth100.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrig_primed_smooth0.txt > ./output/Angiosperm353/treePL/gtr_i_g/supermx_euphorbs_gtrig_primed_smooth0.log
+
+treePL ./scripts/config_files/supermx_euphorbs_gtrig_primed_smooth100.txt > ./output/Angiosperm353/treePL/gtr_i_g/supermx_euphorbs_gtrig_primed_smooth100.log
+
+
+
+
+

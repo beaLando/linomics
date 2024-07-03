@@ -1,0 +1,52 @@
+PIPELINE
+
+
+
+BEFORE STARTING
+
+Not necessary to do sudo su before starting
+
+
+Access external disk under /mnt/
+
+!!Following is needed only if I cannot access external drive E (it could have any other name)
+
+sudo umount /mnt/e
+sudo mount -t drvfs E: /mnt/e
+
+
+!!Following is only needed if my file names contain a space
+
+rename "s/ *//g" *.fq.gz
+
+
+
+FASTQC
+cd /dir/where/raw/reads/are
+
+fastqc *.fq.gz -o /dir/output -noextract
+
+
+
+MULTIQC
+cd /dir/output
+
+multiqc -ip *_fastqc.zip -o /dir/output1
+
+
+
+TRIMMOMATIC (maybe BBDuk would be better; it is faster and as precise as trimmomatic)
+NB: 	1. Loop for all files (https://www.biostars.org/p/268858/), execute one line at time!
+	2. Adapters retrieved from fastqc outputs. Different ones for forward and reverse.
+
+for f1 in *F.fq.gz
+do
+f2=${f1%%F.fq.gz}"R.fq.gz"
+java -jar /home/bland/Programs/Trimmomatic-0.38/trimmomatic-0.38.jar PE -phred33 -trimlog TrimLog $f1 $f2 filtered_$(basename -s .fq.gz $f1)_P.fq.gz filtered_$(basename -s .fq.gz $f1)_U.fq.gz filtered_$(basename -s .fq.gz $f2)_P.fq.gz filtered_$(basename -s .fq.gz $f2)_U.fq.gz ILLUMINACLIP:adapters_qc.fa:2:30:10 AVGQUAL:20 MINLEN:140
+done
+
+!!Only in case I want to terminate loop before it ends:
+Ctrl-Z
+kill %%
+
+

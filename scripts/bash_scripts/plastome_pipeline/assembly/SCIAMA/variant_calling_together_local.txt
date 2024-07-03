@@ -1,0 +1,2 @@
+bcftools mpileup -Ou -f /mnt/f/Plastome_Linum/Linum_RAW_1/refs/ref_Lus_NC_036356.fasta *.sorted.bam | bcftools call --ploidy 1 -mv -Oz -o together.calls.vcf.gz 
+tabix together.calls.vcf.gz

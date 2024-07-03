@@ -1,0 +1,55 @@
+for fq1 in `ls /mnt/e/Plastome_Linum/Linum_RAW_1/*.calls.vcf.gz`
+    do
+    echo "working with file $fq1"
+
+    dir="/mnt/e/Plastome_Linum/Linum_RAW_1"
+    base=$(basename $fq1 ".calls.vcf.gz")
+    echo "base name is $base"
+
+    vf=${dir}/${base}.calls.filtered.vcf.gz
+
+    bcftools filter -g5 -G10 -e '%MIN(QUAL)=220 & %MIN(DP)=50 & %MAX(DP)=200' $fq1 -Oz -o $vf
+    tabix $vf
+
+    done
+
+
+
+
+
+genome=/mnt/e/Plastome_Linum/Linum_RAW_1/refs/ref_Lus_NC_036356.fasta
+
+for vc1 in `ls /mnt/e/Plastome_Linum/Linum_RAW_1/*.calls.filtered.vcf.gz`
+    do
+    echo "working with file $vc1"
+
+    dir="/mnt/e/Plastome_Linum/Linum_RAW_1"
+    base=$(basename $vc1 ".calls.filtered.vcf.gz")
+    echo "base name is $base"
+
+    cons=${dir}/${base}.consensus.filtered.fa
+    st=${dir}/${base}.consensus.filtered.vcf.stats
+
+    cat $genome | bcftools consensus $vc1 > $cons
+    bcftools stats -F $genome -s - $vc1 > $st
+    
+    done
+
+
+
+
+
+for i in *.consensus.filtered.fa
+    do
+
+    dir="/mnt/e/Plastome_Linum/Linum_RAW_1"
+    base=$(basename $i ".consensus.filtered.fa")
+    echo "base name is $base"
+
+    out=${dir}/${base}.consensus.filtered.named.fa
+
+    sed "1s/.*/>${i%.fa}/" $i > $out
+        
+    done
+
+cat *.consensus.filtered.named.fa > consensus.filtered.named.fasta

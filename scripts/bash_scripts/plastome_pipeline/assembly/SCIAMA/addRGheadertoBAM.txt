@@ -1,0 +1,85 @@
+for f1 in `ls /mnt/f/Plastome_Linum/Linum_RAW_1/*.sorted.bam`
+    do
+    echo "working with file $f1"
+
+    dir="/mnt/f/Plastome_Linum/Linum_RAW_1/unsorted"
+    base=$(basename $f1 ".sorted.bam")
+    in=${base}.bam
+    out=${dir}/${base}.nhrg.bam
+    lb="unknown"
+    pl="Illumina"
+    pu=${base}_${lb}
+    echo -e "@RG\tSM:$base\tPL:$pl\tLB:$lb\tPU:$pu"    
+
+    java -jar /home/bland/Programs/picard.jar AddOrReplaceReadGroups \
+      I=$in \
+      O=$out \
+      RGLB=$lb \
+      RGPL=$pl \
+      RGPU=$pu \
+      RGSM=$base
+
+    done
+
+
+
+java -jar /home/bland/Programs/picard.jar ValidateSamFile \
+        I=L01.nhrg.bam \
+        MODE=SUMMARY
+java -jar /home/bland/Programs/picard.jar ValidateSamFile \
+        I=L01.bam \
+        MODE=SUMMARY
+
+
+
+####ls *.bam | parallel --progress --eta -j 3 'samtools merge merged.bam *bam'
+
+##missing commands for merging and sorting - probably something like: 
+###samtools merge merged.bam *.nhrg.bam
+###samtools view -H merged
+###samtools sort merged.bam -o merged.sorted.bam 
+
+samtools flagstat merged.sorted.bam
+749147622 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+58035225 + 0 mapped (7.75% : N/A)
+749147622 + 0 paired in sequencing
+374573811 + 0 read1
+374573811 + 0 read2
+53391376 + 0 properly paired (7.13% : N/A)
+57469004 + 0 with itself and mate mapped
+566221 + 0 singletons (0.08% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+samtools view -f0x2 -b merged.sorted.bam > merged.sorted.matesonly.bam
+
+samtools flagstat merged.sorted.matesonly.bam
+53391376 + 0 in total (QC-passed reads + QC-failed reads)
+0 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+53391376 + 0 mapped (100.00% : N/A)
+53391376 + 0 paired in sequencing
+26695688 + 0 read1
+26695688 + 0 read2
+53391376 + 0 properly paired (100.00% : N/A)
+53391376 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+genome=/mnt/f/Plastome_Linum/Linum_RAW_1/refs/ref_Lus_NC_036356.fasta
+
+samtools index merged.sorted.matesonly.bam
+bcftools mpileup -Ou -d 400 -f $genome merged.sorted.matesonly.bam | bcftools call --ploidy 1 -mv -Oz -o sorted.calls.matesonly.vcf.gz
+tabix sorted.calls.matesonly.vcf.gz
+
+bcftools filter -g5 -G10 -e '%MIN(QUAL)=220 & %MIN(DP)=50 & %MAX(DP)=200' sorted.calls.matesonly.vcf.gz -Oz -o sorted.calls.matesonly.filter.vcf.gz
+tabix sorted.calls.matesonly.filter.vcf.gz
+
+
+
+

@@ -1,0 +1,18 @@
+genome=/mnt/e/Plastome_Linum/Linum_RAW_1/refs/ref_Lus_NC_036356.fasta
+
+for vc1 in `ls /mnt/e/Plastome_Linum/Linum_RAW_1/*.calls.vcf.gz`
+    do
+    echo "working with file $vc1"
+
+    dir="/mnt/e/Plastome_Linum/Linum_RAW_1"
+    base=$(basename $vc1 ".calls.vcf.gz")
+    echo "base name is $base"
+
+    vc1=${dir}/${base}.calls.vcf.gz
+    cons=${dir}/${base}.consensus.fa
+    st=${dir}/${base}.consensus.vcf.stats
+
+    cat $genome | bcftools consensus $vc1 > $cons
+    bcftools stats -F $genome -s - $vc1 > $st
+    
+    done

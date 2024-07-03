@@ -1,0 +1,161 @@
+# Run iqtree for each gene separately
+## because the space character in 'Shared drives' creates problems in iqtree (does not find files) I run trees in alignment subfolder, then I move trees to output folder, so I circumnavigate problem with space in path
+## it would be easier to change folder name and remove space, but this cannot be done with gDrive default folders
+
+mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353
+mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree
+
+mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/gtr_g
+mkdir /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/gtr_i_g
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/data/Angiosperm353/aln
+
+
+
+## ROOTED
+
+### IQtree - no partitions
+
+mkdir ./no_partitions_rooted
+
+for aln in `ls ./aligned_trimmed_clean/*.tal`
+
+do
+
+path_name="./no_partitions_rooted"
+gene_name=$(basename -s .mft.tal $aln)
+echo ${gene_name}
+
+iqtree -nt 5 -s $aln -m GTR+G -bb 1000 -wbtl -o "Euphorbia_mesembryanthemifolia" -pre ${path_name}/${gene_name} #GTR+I+G
+
+done
+
+mv -i ./no_partitions_rooted /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/
+
+
+
+### IQtree - partitions
+
+mkdir ./partitions_rooted
+
+iqtree -nt 5 -s ./aligned_trimmed_clean_supermatrix/supermx353_final.mft.tal.nexus -spp ./aligned_trimmed_clean_supermatrix/supermx353_partitions_final.txt -m GTR+G -bb 1000 -wbtl -o "Euphorbia_mesembryanthemifolia" -pre ./partitions_rooted/supermx353 #GTR+I+G
+
+mv -i ./partitions_rooted /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/
+
+
+
+### Run Astral on gene trees (no partitions - rooted)
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/
+
+#mkdir ./output/Angiosperm353/Astral
+
+## gtr_g
+cat ./output/Angiosperm353/iqtree/gtr_g/no_partitions_rooted/*.contree >> ./output/Angiosperm353/iqtree/gtr_g/no_partitions_rooted/astral_input.tre
+
+head -n1 ./output/Angiosperm353/iqtree/gtr_g/no_partitions_rooted/astral_input.tre
+
+java -jar /home/bland/Programs/Astral/astral.5.7.8.jar -i ./output/Angiosperm353/iqtree/gtr_g/no_partitions_rooted/astral_input.tre -o ./output/Angiosperm353/Astral/gtr_g/astral353_rooted.tre --outgroup Euphorbia_mesembryanthemifolia 2> ./output/Angiosperm353/Astral/gtr_g/astral353_rooted.log
+
+
+## gtr_i_g
+cat ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_rooted/*.contree >> ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_rooted/astral_input.tre
+
+head -n1 ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_rooted/astral_input.tre
+
+java -jar /home/bland/Programs/Astral/astral.5.7.8.jar -i ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_rooted/astral_input.tre -o ./output/Angiosperm353/Astral/gtr_i_g/astral353_rooted.tre --outgroup Euphorbia_mesembryanthemifolia 2> ./output/Angiosperm353/Astral/gtr_i_g/astral353_rooted.log
+
+
+
+
+## UNROOTED
+
+### IQtree - no partitions (i think unrooted trees are needed for astral III?)
+
+mkdir ./no_partitions_unrooted
+
+for aln in `ls ./aligned_trimmed_clean/*.tal`
+
+do
+
+path_name="./no_partitions_unrooted"
+gene_name=$(basename -s .mft.tal $aln)
+echo ${gene_name}
+
+iqtree -nt 5 -s $aln -m GTR+G -bb 1000 -wbtl -pre ${path_name}/${gene_name} #GTR+I+G
+
+done
+
+mv -i ./no_partitions_unrooted /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/
+
+
+
+### IQtree - partitions
+
+mkdir ./partitions_unrooted
+
+iqtree -nt 5 -s ./aligned_trimmed_clean_supermatrix/supermx353_final.mft.tal.nexus -spp ./aligned_trimmed_clean_supermatrix/supermx353_partitions_final.txt -m GTR+G -bb 1000 -wbtl -pre ./partitions_unrooted/supermx353 #GTR+I+G
+
+mv -i ./partitions_unrooted /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/iqtree/
+
+
+
+### Run Astral on gene trees (no partitions - unrooted)
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/
+
+#mkdir ./output/Angiosperm353/Astral
+
+## gtr_g
+cat ./output/Angiosperm353/iqtree/gtr_g/no_partitions_unrooted/*.contree >> ./output/Angiosperm353/iqtree/gtr_g/no_partitions_unrooted/astral_input.tre
+
+head -n1 ./output/Angiosperm353/iqtree/gtr_g/no_partitions_unrooted/astral_input.tre
+
+java -jar /home/bland/Programs/Astral/astral.5.7.8.jar -i ./output/Angiosperm353/iqtree/gtr_g/no_partitions_unrooted/astral_input.tre -o ./output/Angiosperm353/Astral/gtr_g/astral353_unrooted.tre --outgroup Euphorbia_mesembryanthemifolia 2> ./output/Angiosperm353/Astral/gtr_g/astral353_unrooted.log
+
+## gtr_i_g
+cat ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_unrooted/*.contree >> ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_unrooted/astral_input.tre
+
+head -n1 ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_unrooted/astral_input.tre
+
+java -jar /home/bland/Programs/Astral/astral.5.7.8.jar -i ./output/Angiosperm353/iqtree/gtr_i_g/no_partitions_unrooted/astral_input.tre -o ./output/Angiosperm353/Astral/gtr_i_g/astral353_unrooted.tre --outgroup Euphorbia_mesembryanthemifolia 2> ./output/Angiosperm353/Astral/gtr_i_g/astral353_unrooted.log
+
+
+
+# PHYPARTS - represent tree conflicts for Astral output
+
+cd /mnt/g/'Shared drives'/linum_genomics/analysis/output/Angiosperm353/
+
+# Root Astral tree with phyx
+## After running line below, remove anything that comes after semicolumn in reference tree (used for option -m in phyparts), also spaces and enters, otherwise phyparts does not work
+
+pxrr -t ./Astral/gtr_i_g/astral353_unrooted.tre -g Euphorbia_mesembryanthemifolia -o ./Astral/gtr_i_g/astral353_unrooted_phyxed.tre
+
+
+# Root gene trees with phyx
+
+mkdir ./iqtree/gtr_i_g/no_partitions_unrooted/contrees_phyxed
+
+for f in `ls ./iqtree/gtr_i_g/no_partitions_unrooted/*.contree`
+
+do
+
+tree_name=$(basename -s .contree $f)
+output_name=${tree_name}_phyxed.contree
+echo ${output_name}
+
+pxrr -t $f -g Euphorbia_mesembryanthemifolia -o ./iqtree/gtr_i_g/no_partitions_unrooted/contrees_phyxed/${output_name} 
+
+done
+
+
+# Run phyparts
+
+mkdir ./Astral/gtr_i_g/phyparts_unrooted/
+
+java -jar /home/bland/Programs/phyparts/target/phyparts-0.0.1-SNAPSHOT-jar-with-dependencies.jar -d ./iqtree/gtr_i_g/no_partitions_unrooted/contrees_phyxed/ -m ./Astral/gtr_i_g/astral353_unrooted_phyxed.tre -a 1 -v -o ./Astral/gtr_i_g/phyparts_unrooted/
+
+
+# Run piecharts tool (gives runtime error but produces graph, although in current folder, not in output folder?)
+
+python3 /mnt/g/'Shared drives'/linum_genomics/analysis/scripts/bash_scripts/phypartspiecharts.py ./Astral/gtr_i_g/astral353_unrooted_phyxed.tre -o ./Astral/gtr_i_g/phyparts_unrooted/astral353_unrooted_phyxed 318

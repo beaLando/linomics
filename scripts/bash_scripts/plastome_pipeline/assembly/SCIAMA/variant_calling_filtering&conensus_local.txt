@@ -1,0 +1,32 @@
+bcftools filter -g5 -G10 -e '%MIN(MQ)=35 & %MIN(QUAL)=220 & %MIN(DP)=3800 & %MAX(DP)=4000' sorted.calls.matesonly.vcf.gz -Oz -o sorted.calls.matesonly.filtered.vcf.gz
+tabix sorted.calls.matesonly.filtered.vcf.gz
+
+file="sorted.calls.matesonly.filtered.vcf.gz"
+
+for sample in `bcftools query -l $file`; do
+bcftools view -c1 -Oz -s $sample -o ${file/.vcf*/.$sample.vcf.gz} $file
+done
+
+genome=/mnt/f/Plastome_Linum/Linum_RAW_1/refs/ref_Lus_NC_036356.fasta
+
+for vc1 in `ls /mnt/f/Plastome_Linum/Linum_RAW_1/unsorted/cons_trial/individual_vcf/*.vcf.gz`
+    do
+    echo "working with file $vc1"
+
+    dir="/mnt/f/Plastome_Linum/Linum_RAW_1/unsorted/cons_trial/individual_vcf"
+    pre="sorted.calls.matesonly.filtered."
+    baze=$(basename $vc1 ".vcf.gz")
+    base=${baze#"$pre"}
+    echo "base name is $base"
+
+    cons=${dir}/${base}.consensus.filtered.fa
+    st=${dir}/${base}.consensus.filtered.vcf.stats
+
+    tabix $vc1
+    cat $genome | bcftools consensus $vc1 > $cons
+    bcftools stats -F $genome -s - $vc1 > $st
+    
+    done
+
+
+awk '/^>/{print ">" substr(FILENAME,1,length(FILENAME)-22); next} 1' *.consensus.filtered.fa > consensus.multi.fa

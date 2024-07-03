@@ -1,0 +1,21 @@
+for f1 in `ls /mnt/e/Plastome_Linum/Linum_RAW_1/*F.fq.gz`
+   do
+   echo "working with file $f1"
+
+   dir="/mnt/e/Plastome_Linum/Linum_RAW_1"
+   base=$(basename $f1 "_F.fq.gz")
+   echo "base name is $base"
+
+   f1=${dir}/${base}_F.fq.gz
+   f2=${dir}/${base}_R.fq.gz
+   echo "f1 is $f1"
+   echo "f2 is $f2"
+
+   f1p=${dir}/${base}_F_P.filtered.fq.gz
+   f1u=${dir}/${base}_F_U.filtered.fq.gz
+   f2p=${dir}/${base}_R_P.filtered.fq.gz
+   f2u=${dir}/${base}_R_U.filtered.fq.gz
+
+   java -jar /home/bland/Programs/Trimmomatic-0.38/trimmomatic-0.38.jar PE -phred33 -trimlog TrimLog $f1 $f2 $f1p $f1u $f2p $f2u ILLUMINACLIP:/mnt/e/Plastome_Linum/Linum_RAW_1/refs/adapterIL.fa:2:30:10 AVGQUAL:20 MINLEN:40
+
+   done

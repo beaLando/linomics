@@ -1,0 +1,45 @@
+[Input files containing the ML trees]
+#treefile = /home/kjlm1/PENtrials/PENtreePLtrials_besttree_noBSx100.tre
+treefile = /home/kjlm1/PENtrials/PENtreePLtrials_rapidBS_BSreps.tre
+
+[General commands]
+numsites = 46051
+nthreads = 4
+thorough
+log_pen
+
+[Calibrations]
+mrca = ARALIACEAE Schefflera_actinophylla Raukaua_simplex
+min = ARALIACEAE 38.3
+max = ARALIACEAE 112
+mrca = TORRICELLIACEAE Torricellia_tiliifolia Melanophylla_alnifolia
+min = TORRICELLIACEAE 48.5
+max = TORRICELLIACEAE 122
+mrca = APIALES Pennantia_cunninghamii Raukaua_simplex
+min = APIALES 69.9
+max = APIALES 95.9
+
+[Priming command]
+#prime
+
+[Best optimisation parameters]
+opt = 3
+moredetail
+optad = 3
+moredetailad
+optcvad = 5
+
+[Cross-validation analysis]
+#randomcv
+#cviter = 5
+#cvsimaniter = 1000000000
+#cvstart = 100000
+#cvstop = 0.000000000001
+#cvmultstep = 0.1
+#cvoutfile = /home/kjlm1/PENtrials/randomcv_PEN.txt
+
+[Best smoothing value]
+smooth = 0.000001
+
+[Output file of dating step]
+outfile = /home/kjlm1/PENtrials/PEN_treePL_trials_dated.tre
