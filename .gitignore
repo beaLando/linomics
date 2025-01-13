@@ -3,6 +3,7 @@ paper/
 output/
 scripts/config_files
 scripts/config_files/
+phyparts/
 *.pdf
 *.docx
 *.xlsx
