@@ -1,0 +1,57 @@
+[Config file treePL]
+
+
+[Input]
+treefile = ./data/Angiosperm353/iqtrees/gtr_i_g/Astral/astral353_1.phyxed.tre
+
+
+[General commands]
+numsites = 224264
+nthreads = 5
+thorough
+#log_pen
+
+
+[Calibrations]
+#mrca = NODE taxon1 taxon2 
+#min = NODE min_age
+#max = NODE max_age
+#...add as many as needed
+
+#mrca = EUPHORBIOIDS Euphorbia_mesembryanthemifolia Linum_flavum 
+#min = EUPHORBIOIDS 103.1
+#max = EUPHORBIOIDS 111.3
+
+mrca = LINUM VXOD C96
+min = LINUM 33.9
+max = LINUM 37.2
+
+
+[Priming command]
+prime
+
+
+[Best optimisation parameters]
+#opt = 
+#moredetail
+#optad = 
+#moredetailad
+#optcvad = 
+
+
+[Cross-validation]
+#randomcv
+#cviter =
+#cvsimaniter =
+#cvstart =
+#cvstop = 
+#cvmultstep =
+#cvoutfile =
+
+
+[Best smoothing value]
+smooth = 100
+
+
+[Output dating file]
+outfile = ./data/Angiosperm353/iqtrees/gtr_i_g/Astral/astral353_linum_sm100_unprimed_dated.tre
