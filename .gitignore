@@ -7,6 +7,9 @@ scripts/1_bash_scripts/
 scripts/2_R_scripts/
 phyparts/
 Astral/
+QuIBL/
+**/*old*
+**/*NewTargets*
 *.pdf
 *.docx
 *.xlsx
@@ -20,6 +23,7 @@ analysis.Rproj
 *.pptx
 *.log
 *.py
+*.jar
 *.logfile
 *.md
 *.DS_Store

@@ -1,0 +1,171 @@
+# PLASTOME
+## DELTA LIKELIHOOD PLASTOME TOPOLOGIES
+conda activate phylo
+
+iqtree -s ./data/Angiosperm353/aln_plastid/supermx353.mft.tall.nexus -p ./data/Angiosperm353/iqtrees/plastid/partitions2test.txt -z ./data/Angiosperm353/iqtrees/plastid/topologies2test_lb.nwk -n 0 -wpl -zb 100000 -au -pre ./data/Angiosperm353/iqtrees/plastid/topologies2test_lb
+
+# NUCLEAR
+## PHYTOP (ILS vs HYBR)
+java -jar ./Astral/astral.5.7.8.jar -t 2 -i ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral_input.tre -o ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353_allAnnotations_1.tre 2> ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353_allAnnotations_1.log
+
+pxrr -t ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353_allAnnotations_1.tre -g ERR2040368_nuclear -o ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353_allAnnotations_1.phyxed.tre
+
+mkdir ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/tmp 
+
+phytop ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353_allAnnotations_1.phyxed.tre -tmp ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/tmp 
+
+conda deactivate
+
+## PHYLONET (HYBR despite ILS?)
+conda activate snaq_env
+
+julia
+using PhyloNetworks
+
+out_path = "./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/"
+mkpath(out_path)
+
+### Define the list of taxa you want to KEEP
+#keep_taxa = ["D13", "D10", "D01", "D02", "D07", "C96", "D03", "perenne", "HNCF"]
+#keep_taxa_nonarb = ["D13", "D10", "D01", "D02", "C96", "D03", "perenne", "HNCF"]
+keep_taxa_noM = ["D13_nuclear", "D10_nuclear", "D07_nuclear", "C96_nuclear", "D03_nuclear", "HNCF_nuclear"] #"ERR2040380_nuclear", "D02_nuclear", 
+
+### Load Species Tree
+species_tree = readTopology("./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral353.phyxed.tre")
+
+taxa_map = Dict(
+    "D13_nuclear" => "bienne",
+    "D10_nuclear" => "bienne", 
+    "D07_nuclear" => "narbonense",
+    "C96_nuclear" => "grandiflorum",
+    "D03_nuclear" => "decumbens",
+    "HNCF_nuclear" => "hirsutum")
+
+all_taxa = tipLabels(species_tree)
+
+taxa_to_delete = setdiff(all_taxa, keys(taxa_map))
+for taxon in taxa_to_delete
+    deleteleaf!(species_tree, taxon)
+end
+
+representatives = ["D13_nuclear", "D07_nuclear", "C96_nuclear", "D03_nuclear", "HNCF_nuclear"]
+# We delete the "redundant" ones (D10_nuclear)
+deleteleaf!(species_tree, "D10_nuclear")
+
+for leaf in species_tree.leaf
+    old_name = leaf.name
+    leaf.name = taxa_map[old_name]
+end
+
+println(tipLabels(species_tree))
+rootatnode!(species_tree, "hirsutum")
+
+writeTopology(species_tree, joinpath(out_path, "phylonet_input_NOper_speciesTree2add.txt"))
+
+### Load your full set of (best ML) gene trees
+full_trees = readMultiTopology("./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/astral_input.tre") 
+reduced_trees = [deepcopy(t) for t in full_trees]
+
+# Prune and root in one pass
+for t in reduced_trees
+    # 1. Prune
+    taxa_to_remove = setdiff(tipLabels(t), keep_taxa_noM)
+    for taxon in taxa_to_remove
+        deleteleaf!(t, taxon)
+    end
+
+    # 2. Check for sufficient tree size
+    # A tree needs at least 3 tips to be meaningfully rooted
+    if length(tipLabels(t)) >= 3
+        
+        # Sync the internal structure after pruning
+        directEdges!(t)
+    
+    # 3. Root safely
+    if "HNCF_nuclear" in tipLabels(t)
+        rootatnode!(t, "HNCF_nuclear")
+    elseif "ERR2040380_nuclear" in tipLabels(t)
+        rootatnode!(t, "ERR2040380_nuclear")
+    end
+else
+        @warn "Tree skipped: fewer than 3 taxa remaining after pruning."
+end
+end
+
+# note: the following produces a file with trees listed correctly and the InferNetwork command set up as a canva. I then opened it and changed parameters manually if I needed to.
+function write_phylonet_nexus(trees, filename; hmax=0, nruns=10)
+    open(filename, "w") do io
+        write(io, "#NEXUS\n\n")
+        
+        # BEGIN TREES block
+        write(io, "BEGIN TREES;\n")
+        for (i, t) in enumerate(trees)
+            # Write each tree in Newick format
+            write(io, "Tree gt$i = $(writeTopology(t))\n")
+        end
+        write(io, "END;\n\n")
+        
+        # BEGIN PHYLONET block
+        write(io, "BEGIN PHYLONET;\n")
+        
+        # We use InferNetwork_ML for Maximum Likelihood
+        # -maxh: Maximum number of reticulations
+        # -n: Number of optimal networks to return
+        # -pl: Number of processors (adjust as needed)
+        # -mr: Number of runs for the search heuristic
+        tree_names = ["gt$i" for i in 1:length(trees)]
+        trees_str = join(tree_names, " ")
+        
+        write(io, "InferNetwork_MP (all) $hmax \n")
+        write(io, " -n 10 \n")
+        write(io, " -x 10 \n")
+        write(io, " -pl 6 \n") # Uses 4 cores
+        write(io, " ;\n")
+        
+        write(io, "END;\n")
+    end
+    println("PhyloNet NEXUS file saved to: $filename")
+end
+
+# Run the function
+write_phylonet_nexus(reduced_trees, joinpath(out_path, "phylonet_input_NOper_2custom.nex"), hmax=10, nruns=10)
+
+#exit julia with Ctrl+X
+
+conda deactivate
+
+# RUN PHYLONET
+## Without L. perenne and with starting tree
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_0.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_0.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_1.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_1.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_2.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_2.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_3.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_3.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_4.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_4.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_5.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_5.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_6.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_6.txt
+
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_0.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_0.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_1.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_1.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_2.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_2.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_3.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_3.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_4.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_4.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_5.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_5.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MPL_wSppTree_6.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MPL_wSppTree_6.txt
+
+
+
+
+
+
+
+
+
+
+## Without L. perenne and with starting tree
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_noHol_MP_wSppTree_0.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_noHol_MP_wSppTree_0.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_1.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_1.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_2.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_2.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_3.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_3.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_4.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_4.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_5.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_5.txt
+java -Xmx12g -jar PhyloNetv3_8_2.jar ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_input_noPer_MP_wSppTree_6.txt > ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/phylonet_output_noPer_MP_wSppTree_6.txt

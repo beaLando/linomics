@@ -1,0 +1,121 @@
+conda activate snaq_env
+
+julia
+
+#import Pkg
+
+#Pkg.add(["PhyloPlots", "RCall", "CSV", "DataFrames"])
+
+using PhyloNetworks   # network I/O, manipulation
+using PhyloPlots      # plot() method for HybridNetwork objects
+using RCall           # needed by PhyloPlots at runtime
+
+net_ML1_lb_best = readTopology("(hirsutum:0.12690773023966948,((bienne:1.0902006095730272)#H1:1.8724269407494951::0.050808538302931416,(narbonense:0.022391463211522272,(#H1:2.3734711124382297::0.9491914616970686,(grandiflorum:2.126756343578251,decumbens:7.371305173148464):2.0732583843552446):0.15282217871639758):4.913000167045098):2.626155661917847);")
+
+net_ML1_lb_secondary = readTopology("(hirsutum:0.24631933296679265,(narbonense:0.32101000233604277,((bienne:2.995739592829998)#H1:0.21176525788609624::0.7469064408194991,(#H1:0.20641110044257371::0.2530935591805009,(grandiflorum:0.010090039570159914,decumbens:3.747682004099284E-4):2.3181690854699517):0.04568291440270951):0.101163336399686):8.29617966132559);")
+
+net_ML2_lb_best = readTopology("(hirsutum:0.09550543415927346,(((bienne:0.17768879452145242)#H2:0.916633414416105::0.03146842400354932)#H1:1.5250760996086383::0.6754150706018403,(narbonense:0.043721240616240775,((decumbens:2.5296270732226764,grandiflorum:0.3807634014267618):2.321220293756171,(#H2:4.530240370173104::0.9685315759964507,#H1:1.934670706638734::0.32458492939815975):1.196582682223942):0.15735632523106577):1.848114439340342):6.2638035885686625);")
+
+net_ML2_lb_secondary = readTopology("(hirsutum:0.13778764445329944,((bienne:1.143358990489759)#H1:0.6776406575113579::0.034526188711206274,(narbonense:1.8711374828142109,((#H1:2.8961027672530775::0.9654738112887937)#H2:2.2246648433438283::0.5315546325682967,(#H2:1.2940081871963063::0.46844536743170323,(decumbens:0.6382740611092623,grandiflorum:0.15734896904755435):2.6945602445222194):0.09459574058826987):0.10473207446787859):13.624639655943074):9.4623259539236);")
+
+net_ML1_all_best = readTopology("(hirsutum:2.588124154455026,((narbonense:4.352561007397007)#H1:4.160980204388217::0.3593330663117412,(((grandiflorum:1.0626549158466772,decumbens:1.791714742640742):2.428424933176867,bienne:2.7742104604406226):0.03726829196603053,#H1:0.28783354515068804::0.6406669336882588):0.4820134118361771):6.815312344154125);")
+
+net_ML2_all_best = readTopology("(hirsutum:2.4300155994641384,((bienne:1.1931621530863765)#H1:0.32600995962292667::0.06326586798729772,(narbonense:2.168578258260648,((grandiflorum:2.836777890759998,decumbens:4.98235705267143):2.384356714118305,#H1:3.697433282569384::0.9367341320127023):0.10940978335859466):0.7171571465340293):6.434496922363379);")
+
+net_ML2_all_secondary = readTopology("(hirsutum:1.372319448718141,(((decumbens:1.1406570948910588,grandiflorum:0.46205846247246574):0.90165116060997)#H1:1.845205762323045::0.11437062717380829,(((bienne:2.9724654590006874,#H1:5.9256672745653125::0.8856293728261917):3.2626138617583567E-4)#H2:1.0::0.5,(narbonense:1.4250979554699779,#H2:0.144002305452711::0.5):0.23141051740462837):0.3212076267057903):7.002601395276301);")
+
+net_ML0_all_best = readTopology("(hirsutum:0.1579930565744506,(narbonense:1.0464525097746953,(bienne:2.7133935068022956,(decumbens:3.675917020921333,grandiflorum:7.228650119436454):2.5497172451091403):0.20141342693150138):7.644079301642109);")
+
+rootatnode!(net_ML1_lb_best, "hirsutum")
+rootatnode!(net_ML1_lb_secondary, "hirsutum")
+rootatnode!(net_ML2_lb_best, "hirsutum") 
+rootatnode!(net_ML2_lb_secondary, "hirsutum")
+rootatnode!(net_ML0_all_best, "hirsutum")
+rootatnode!(net_ML1_all_best, "hirsutum")
+rootatnode!(net_ML2_all_best, "hirsutum")
+rootatnode!(net_ML2_all_secondary, "hirsutum") 
+
+plot(net_ML2_all_secondary, :R,
+     showGamma            = true,
+     useEdgeLength       = false,
+     showNodeNumber       = false,
+     showTipLabel         = true,
+     edgeColor            = "black",
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue",
+     arrowlen             = 0.05)
+
+
+R"""
+pdf("./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/net_ML_LBonly_networks.pdf", width=24, height=30)
+par(mfrow=c(4,2))
+"""
+plot(net_ML1_lb_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML1_lb_secondary, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML2_lb_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML2_lb_secondary, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML0_all_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML1_all_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML2_all_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+plot(net_ML2_all_secondary, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+
+R"""
+dev.off()
+"""
+
+R"""
+pdf("./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/nodeLB/net_ML0_network.pdf", width=12, height=7.5)
+par(mfrow=c(1,1))
+"""
+plot(net_ML0_all_best, :R,
+     showGamma            = true,
+     showTipLabel         = true,
+     minorHybridEdgeColor = "deepskyblue",
+     majorHybridEdgeColor = "deepskyblue")
+
+R"""
+dev.off()
+"""
+
+conda deactivate
+ 
