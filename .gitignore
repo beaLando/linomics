@@ -9,6 +9,7 @@ phyparts/
 Astral/
 QuIBL/
 **/*old*
+**/*unused*
 **/*NewTargets*
 *.pdf
 *.docx
