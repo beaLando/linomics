@@ -12,10 +12,13 @@ Please refer to Supplementary Tables XX and XX for ENA, NCBI, and Tree of Life s
 
 This repo in particular contains scripts to:
 
-`00.` Clean accession data
-`01.` Execute a phylogenomic reconstruction of the genus Linum based on nuclear (angiosperms353) and plastid genes via maximum likelihood, coalescence, and network methods
-`02-03.` Execute a phylogeographic reconstruction of L. bienne across its distribution based on whole plastomes, as well as occurrence (GBIF) and climate data.
-`04.` Downstream processing and plotting of outputs from above analyses (some of these scripts also make use of outputs from demographic pipeline at XXXX)
+- Clean accession data
+
+- Execute a phylogenomic reconstruction of the genus Linum based on nuclear (angiosperms353) and plastid genes via maximum likelihood, coalescence, and network methods
+
+- Execute a phylogeographic reconstruction of L. bienne across its distribution based on whole plastomes, as well as occurrence (GBIF) and climate data
+
+- Downstream processing and plotting of outputs from above analyses (some of these scripts also make use of outputs from demographic pipeline at XXXX)
 
 
 # DIRECTORY STRUCTURE & PACKAGES
@@ -36,11 +39,11 @@ Three symbols are used throughout:
 ```
 workDir/
 ├── scripts/                       # 📦 all analysis scripts (this repository)
-│   ├── 00/                        # coordinate correction (R, local)
-│   ├── 01/                        # phylogenomics: nuclear + plastid (shell + R, server/local)
-│   ├── 02/                        # plastome mapping + BEAST dating (shell + R, server/local)
-│   ├── 03/                        # niche modelling (R, local)
-│   └── 04/                        # output processing and plotting (R + Julia, local)
+│   ├── 00_coords_correct.R                        # coordinate correction (R, local)
+│   ├── 01_angiosperm343_pipeline/                        # phylogenomics: nuclear + plastid (shell + R, server/local)
+│   ├── 02_plastome_pipeline/                        # plastome mapping + BEAST dating (shell + R, server/local)
+│   ├── 03_niche_model/                        # niche modelling (R, local)
+│   └── 04_plots/                        # output processing and plotting (R + Julia, local)
 │
 ├── [programs/]                    # 📥 third-party programs (see per-step package lists below)
 │
@@ -49,7 +52,7 @@ workDir/
 
 ---
 
-## scripts/00 — Sample coordinate correction
+## scripts/00_coords_correct — Sample coordinate correction
 
 **Language:** R (local, R Studio)
 
@@ -68,9 +71,9 @@ workDir/
 
 ---
 
-## scripts/01 — Phylogenomics (nuclear & plastid)
+## scripts/01_angiosperm343_pipeline — Phylogenomics (nuclear & plastid)
 
-**Language:** shell (server, conda), R (local, R Studio), Julia (local, conda)
+**Language:** shell (server), R (local, R Studio), Julia (local)
 
 ### Packages — QC and read trimming (scripts 00, server)
 `fastqc`, `fastp`, `multiqc`
@@ -179,9 +182,9 @@ workDir/
 
 ---
 
-## scripts/02 — L. bienne whole-plastome mapping & BEAST dating
+## scripts/02_plastome_pipeline — L. bienne whole-plastome mapping & BEAST dating
 
-**Language:** shell (server, conda), R (local, R Studio)
+**Language:** shell (server), R (local, R Studio)
 
 ### Packages — Read mapping, variant calling and consensus (scripts 01, 03–04, server)
 `fastqc`, `fastp`, `multiqc`, `bowtie2`, `samtools`, `qualimap`, `picard`, `bcftools`,
@@ -201,7 +204,7 @@ workDir/
 > Create the directories marked below before submitting SLURM jobs.
 
 ```
-workDir/   [= Lus_Plastome_paper2024/]
+workDir/
 │
 ├── logs/                               # 📥 create in advance
 │
@@ -242,7 +245,7 @@ workDir/
 
 ---
 
-## scripts/03 — GBIF occurrence data, climate data & niche modelling
+## scripts/03_niche_model — GBIF occurrence data, climate data & niche modelling
 
 **Language:** R (local, R Studio)
 
@@ -274,9 +277,9 @@ workDir/
 
 ---
 
-## scripts/04 — Output processing and plotting
+## scripts/04_plots — Output processing and plotting
 
-**Language:** R (local, R Studio), Julia (local, conda `snaq_env`)
+**Language:** R (local, R Studio), Julia (local)
 
 **R packages:**
 `tidyverse`, `ggplot2`, `ggpubr`, `patchwork`, `gridExtra`, `ggnewscale`, `ggtree`, `quiblR`,
