@@ -1,24 +1,24 @@
-# LINUM BIENNE GENOMICS
+# *LINUM BIENNE* GENOMICS
 
 # OVERVIEW & DATA AVAILABILITY
 
-This is a repository to conduct phylogenomic and phylogeographic analyses in Linum and Linum bienne based on nuclear and plastome data in relation to the following publication: XXXX.
-Note that another repository (XXXX) deals with demographic analyses based on nuclear data for the same publication.
+This is a repository to conduct phylogenomic (nuclear and plastid genes) and phylogeographic (plastomes) analyses in *Linum* and *Linum bienne* respectively, according to the following publication: XXXX.
+Note that another repository (https://github.com/YannBourgeois/Scripts_Linum) deals with *L. bienne* genetic diversity and demographic analyses based on low depth nuclear genome data for the same publication. *L. bienne* plastomes and low depth nuclear genomes were retrieved starting from the same raw reads.
 
 Most genomic data have been produced specifically for this study and have been uploaded under project XXXXX of the European Nucleotide Archive (ENA).
-A subset of Linum species were available online and data can be found at XXXX.
-Only a subset of genomic data for 7 L. bienne accessions was previously uploaded to NCBI (project XXXX).
-Please refer to Supplementary Tables XX and XX for ENA, NCBI, and Tree of Life sample IDs.
+A subset of *Linum* species were available online and data can be found at XXXX.
+Only a subset of genomic data for 7 *L. bienne* accessions was previously uploaded to NCBI (project XXXX).
+Please refer to Supplementary Tables XX and XX from the following manuscript (XXXX) for ENA, NCBI, and Tree of Life sample IDs.
 
 This repo in particular contains scripts to:
 
 - Clean accession data
 
-- Execute a phylogenomic reconstruction of the genus Linum based on nuclear (angiosperms353) and plastid genes via maximum likelihood, coalescence, and network methods
+- Execute a phylogenomic reconstruction of the genus *Linum* based on nuclear (angiosperms353) and plastid genes via maximum likelihood, coalescence, and network methods
 
-- Execute a phylogeographic reconstruction of L. bienne across its distribution based on whole plastomes, as well as occurrence (GBIF) and climate data
+- Execute a phylogeographic reconstruction of *L. bienne* across its distribution based on whole plastomes, as well as occurrence (GBIF) and climate data (worldclim, pastclim)
 
-- Downstream processing and plotting of outputs from above analyses (some of these scripts also make use of outputs from demographic pipeline at XXXX)
+- Downstream processing and plotting of outputs from above analyses (some of these scripts also make use of outputs from demographic pipeline at https://github.com/YannBourgeois/Scripts_Linum)
 
 
 # DIRECTORY STRUCTURE & PACKAGES
@@ -26,6 +26,8 @@ This repo in particular contains scripts to:
 Scripts are organised into four numbered folders under `scripts/`, each corresponding to a major analysis step making use of R or shell scripts, and Julia in a couple of instances. Within `scripts/` subdirectories, individual scripts are also numbered so that everything should be run in the order indicated by the numbers since intermediate outputs are produced which are used in downstream steps.
 
 Steps `00`, `03`, and `04` are run entirely locally in R Studio. Steps `01` and `02` are run mostly on a server (SLURM), with some local post-processing. Julia is only used in steps `01` and `04`. For shell scripts, conda was used to install and manage most programs, with some exceptions.
+
+Necessary libraries and packages are indicated at each step. Please check the manuscript for the version used.
 
 Three symbols are used throughout:
 - 📥 **load manually** — file or directory must be provided by the user before running
@@ -40,7 +42,7 @@ Three symbols are used throughout:
 workDir/
 ├── scripts/                       # 📦 all analysis scripts (this repository)
 │   ├── 00_coords_correct.R                        # coordinate correction (R, local)
-│   ├── 01_angiosperm343_pipeline/                        # phylogenomics: nuclear + plastid (shell + R, server/local)
+│   ├── 01_angiosperm353_pipeline/                        # phylogenomics: nuclear + plastid (shell + R, server/local)
 │   ├── 02_plastome_pipeline/                        # plastome mapping + BEAST dating (shell + R, server/local)
 │   ├── 03_niche_model/                        # niche modelling (R, local)
 │   └── 04_plots/                        # output processing and plotting (R + Julia, local)
@@ -71,7 +73,7 @@ workDir/
 
 ---
 
-## scripts/01_angiosperm343_pipeline — Phylogenomics (nuclear & plastid)
+## scripts/01_angiosperm353_pipeline — Phylogenomics (nuclear & plastid)
 
 **Language:** shell (server), R (local, R Studio), Julia (local)
 
@@ -120,7 +122,7 @@ workDir/
 ├── trimmed_fqs/                        # ⚙️ created by pipeline (receives trimmed reads)
 │
 ├── nuclear_targets.fasta               # ⚙️ filtered Angiosperm353 target file (script 01)
-├── plastid_targets.faa                 # 📥 protein target file for plastid assembly
+├── plastid_targets.faa                 # 📥 protein target file for plastid assembly to get at https://github.com/mossmatters/plastidTargets
 ├── namelist.txt                        # ⚙️ sample accession names (script 01)
 ├── namelist_nuclear.txt                # 📦 as above, with "_nuclear" suffix
 ├── namelist_plastid.txt                # 📦 as above, with "_plastid" suffix
