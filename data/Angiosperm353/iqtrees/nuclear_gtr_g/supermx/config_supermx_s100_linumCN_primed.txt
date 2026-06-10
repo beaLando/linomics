@@ -1,0 +1,54 @@
+[Config file treePL]
+
+
+[Input]
+treefile = ./data/Angiosperm353/iqtrees/nuclear_gtr_g/supermx/supermx353.phyxed.treefile
+
+
+[General commands]
+numsites = 169798
+nthreads = 5
+thorough
+#log_pen
+
+
+[Calibrations]
+#mrca = NODE taxon1 taxon2 
+#min = NODE min_age
+#max = NODE max_age
+#...add as many as needed
+
+#mrca = EUPHORBIOIDS Euphorbia_mesembryanthemifolia Linum_flavum 
+#min = EUPHORBIOIDS 103.1
+#max = EUPHORBIOIDS 111.3
+
+mrca = LINUM VXOD_nuclear C96_nuclear
+min = LINUM 33.9
+max = LINUM 37.2
+
+
+[Best optimisation parameters]
+opt = 1
+moredetail
+optad = 1
+moredetailad
+optcvad = 1
+moredetailcvad
+
+
+[Cross-validation]
+#randomcv
+#cviter =
+#cvsimaniter =
+#cvstart =
+#cvstop = 
+#cvmultstep =
+#cvoutfile =
+
+
+[Best smoothing value]
+smooth = 100
+
+
+[Output dating file]
+outfile = ./data/Angiosperm353/iqtrees/nuclear_gtr_g/supermx/supermx353_linum_sm100_primed_dated.tre

@@ -1,0 +1,13 @@
+[Input]
+treefile: ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/gene_bestrees_phyxed/qibl_trees/allbestrees_pruned190_prunedSPP_completeCases.nwk
+numdistributions: 2
+likelihoodthresh: 0.01
+numsteps: 10
+gradascentscalar: 0.5
+totaloutgroup: ERR2040368_nuclear
+multiproc: True
+maxcores:4
+
+
+[Output]
+OutputPath: ./data/Angiosperm353/iqtrees/nuclear_gtr_g/Astral/quiblOut.csv
